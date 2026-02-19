@@ -21,7 +21,7 @@ export default function Navbar() {
     return (
         <nav className="navbar">
             <NavLink to="/" className="navbar-brand">
-                <span className="logo-icon">🔐</span> RBAC Demo
+                <span className="logo-icon">💬</span> Quotr
             </NavLink>
 
             <div className="navbar-links">
