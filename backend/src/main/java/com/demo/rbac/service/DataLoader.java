@@ -47,7 +47,34 @@ public class DataLoader implements CommandLineRunner {
             saveQuote("The only way to do great work is to love what you do.", "Steve Jobs", "admin");
             saveQuote("In the middle of every difficulty lies opportunity.", "Albert Einstein", "admin");
             saveQuote("It does not matter how slowly you go as long as you do not stop.", "Confucius", "admin");
-            log.info("Sample quotes seeded.");
+            saveQuote("The mind is everything. What you think you become.", "Buddha", "admin");
+            saveQuote("Your time is limited, so don't waste it living someone else's life.", "Steve Jobs", "admin");
+            saveQuote("Stay hungry, stay foolish.", "Steve Jobs", "admin");
+            saveQuote("The best way to predict the future is to invent it.", "Alan Kay", "admin");
+            saveQuote("Life is what happens when you're busy making other plans.", "John Lennon", "admin");
+            saveQuote("Get busy living or get busy dying.", "Stephen King", "admin");
+            saveQuote("You only live once, but if you do it right, once is enough.", "Mae West", "admin");
+            saveQuote(
+                    "Many of life's failures are people who did not realize how close they were to success when they gave up.",
+                    "Thomas A. Edison", "admin");
+            saveQuote("If you want to live a happy life, tie it to a goal, not to people or things.", "Albert Einstein",
+                    "admin");
+            saveQuote("Never let the fear of striking out keep you from playing the game.", "Babe Ruth", "admin");
+            saveQuote("Money and success don’t change people; they merely amplify what is already there.", "Will Smith",
+                    "admin");
+            saveQuote("Not how long, but how well you have lived is the main thing.", "Seneca", "admin");
+            saveQuote("If life were predictable it would cease to be life, and be without flavor.", "Eleanor Roosevelt",
+                    "admin");
+            saveQuote(
+                    "The whole secret of a successful life is to find out what is one’s destiny to do, and then do it.",
+                    "Henry Ford", "admin");
+            saveQuote("In order to write about life first you must live it.", "Ernest Hemingway", "admin");
+            saveQuote("The big lesson in life, baby, is never be scared of anyone or anything.", "Frank Sinatra",
+                    "admin");
+            saveQuote(
+                    "Curiosity about life in all of its aspects, I think, is still the secret of great creative people.",
+                    "Leo Burnett", "admin");
+            log.info("20 sample quotes seeded.");
         }
     }
 
