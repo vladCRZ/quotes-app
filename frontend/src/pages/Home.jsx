@@ -1,8 +1,19 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 
 export default function Home() {
     const { isAuthenticated, user } = useAuth()
+    const [quotes, setQuotes] = useState([])
+    const [quotesLoading, setQuotesLoading] = useState(true)
+
+    useEffect(() => {
+        axios.get('/api/public/quotes')
+            .then(res => setQuotes(res.data))
+            .catch(() => setQuotes([]))
+            .finally(() => setQuotesLoading(false))
+    }, [])
 
     return (
         <div className="page">
@@ -37,6 +48,53 @@ export default function Home() {
                         <p>{f.desc}</p>
                     </div>
                 ))}
+            </div>
+
+            {/* Public Quotes Wall */}
+            <div style={{ marginBottom: '2.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div>
+                        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '.25rem' }}>
+                            💬 Community Quotes
+                        </h2>
+                        <p style={{ fontSize: '.875rem', color: 'var(--text-muted)' }}>
+                            Quotes added by our members — anyone can read, members can contribute.
+                        </p>
+                    </div>
+                    {!isAuthenticated && (
+                        <Link to="/login" className="btn btn-outline btn-sm">Sign in to add quotes →</Link>
+                    )}
+                    {isAuthenticated && (
+                        <Link to="/quotes" className="btn btn-primary btn-sm">Manage Quotes →</Link>
+                    )}
+                </div>
+
+                {quotesLoading && (
+                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                        <span className="spinner" style={{ display: 'inline-block' }} />
+                    </div>
+                )}
+
+                {!quotesLoading && quotes.length === 0 && (
+                    <div className="card" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
+                        No quotes yet.{' '}
+                        {isAuthenticated
+                            ? <Link to="/quotes">Be the first to add one!</Link>
+                            : <Link to="/login">Sign in to add the first one!</Link>}
+                    </div>
+                )}
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
+                    {quotes.map(q => (
+                        <div key={q.id} className="quote-card">
+                            <p className="quote-content">"{q.content}"</p>
+                            <div className="quote-meta">
+                                <span>— <strong>{q.author || 'Unknown'}</strong></span>
+                                <span style={{ fontSize: '.75rem' }}>by {q.createdBy}</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             {/* Architecture */}

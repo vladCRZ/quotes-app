@@ -14,11 +14,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/quotes")
 @RequiredArgsConstructor
 public class QuoteController {
 
     private final QuoteService quoteService;
+
+    // ─── Public (no auth required) ───────────────────────────────────────────
+
+    @GetMapping("/api/public/quotes")
+    public ResponseEntity<List<QuoteResponse>> getAllPublic() {
+        return ResponseEntity.ok(quoteService.findAll());
+    }
 
     // ─── Read ───────────────────────────────────────────────────────────────────
 
