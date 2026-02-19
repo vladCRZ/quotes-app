@@ -33,6 +33,11 @@ export default function Navbar() {
                         User Zone
                     </NavLink>
                 )}
+                {isAuthenticated && (
+                    <NavLink to="/quotes" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+                        💬 Quotes
+                    </NavLink>
+                )}
                 {isAuthenticated && hasRole('ROLE_MANAGER') && (
                     <NavLink to="/manager" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
                         Manager

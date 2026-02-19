@@ -98,6 +98,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/manager/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/api/user/**").hasAnyRole("ADMIN", "MANAGER", "USER")
+                        .requestMatchers("/api/quotes/**").authenticated()
                         .anyRequest().authenticated())
 
                 // ── Custom 401 / 403 JSON responses ───────────────────────────────
