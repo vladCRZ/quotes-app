@@ -14,33 +14,25 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/quotes")
 @RequiredArgsConstructor
 public class QuoteController {
 
     private final QuoteService quoteService;
 
-    // ─── Public (no auth required) ───────────────────────────────────────────
-
-    @GetMapping("/api/public/quotes")
-    public ResponseEntity<List<QuoteResponse>> getAllPublic() {
-        return ResponseEntity.ok(quoteService.findAll());
-    }
-
-    // ─── Read ───────────────────────────────────────────────────────────────────
+    // ─── Read (GET /api/quotes is public; writes require auth) ──────────────
 
     @GetMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<QuoteResponse>> getAll() {
         return ResponseEntity.ok(quoteService.findAll());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<QuoteResponse> getOne(@PathVariable Long id) {
         return ResponseEntity.ok(quoteService.findById(id));
     }
 
-    // ─── Create ─────────────────────────────────────────────────────────────────
+    // ─── Create ─────────────────────────────────────────────────────────────
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
@@ -51,7 +43,7 @@ public class QuoteController {
                 .body(quoteService.create(req, auth.getName()));
     }
 
-    // ─── Update ─────────────────────────────────────────────────────────────────
+    // ─── Update ─────────────────────────────────────────────────────────────
 
     @PutMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
@@ -61,7 +53,7 @@ public class QuoteController {
         return ResponseEntity.ok(quoteService.update(id, req));
     }
 
-    // ─── Delete ─────────────────────────────────────────────────────────────────
+    // ─── Delete ─────────────────────────────────────────────────────────────
 
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")

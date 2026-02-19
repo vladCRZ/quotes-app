@@ -3,6 +3,7 @@ package com.demo.rbac.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -98,6 +99,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/manager/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/api/user/**").hasAnyRole("ADMIN", "MANAGER", "USER")
+                        .requestMatchers(HttpMethod.GET, "/api/quotes", "/api/quotes/*").permitAll()
                         .requestMatchers("/api/quotes/**").authenticated()
                         .anyRequest().authenticated())
 

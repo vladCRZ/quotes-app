@@ -11,7 +11,7 @@ export default function Home() {
     const heroRef = useRef(null)
 
     useEffect(() => {
-        axios.get('/api/public/quotes')
+        axios.get('/api/quotes')
             .then(res => {
                 const data = res.data
                 setQuotes(data)
