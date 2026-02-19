@@ -21,7 +21,8 @@ export default function Login() {
             else if (user.roles?.includes('ROLE_MANAGER')) navigate('/manager')
             else navigate('/user')
         } catch (err) {
-            setError(err.response?.data?.error || 'Login failed — check your credentials.')
+            const data = err.response?.data
+            setError(data?.message || data?.error || 'Login failed — check your credentials.')
         } finally {
             setLoading(false)
         }
