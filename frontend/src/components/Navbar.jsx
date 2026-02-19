@@ -28,6 +28,9 @@ export default function Navbar() {
                 <NavLink to="/" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} end>
                     Home
                 </NavLink>
+                <NavLink to="/community" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+                    💬 Community
+                </NavLink>
                 {isAuthenticated && (
                     <NavLink to="/user" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
                         User Zone

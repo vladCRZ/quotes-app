@@ -10,6 +10,7 @@ import ManagerDashboard from './pages/ManagerDashboard'
 import AdminDashboard from './pages/AdminDashboard'
 import Unauthorized from './pages/Unauthorized'
 import Quotes from './pages/Quotes'
+import CommunityQuotes from './pages/CommunityQuotes'
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/community" element={<CommunityQuotes />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
           {/* Authenticated — any logged-in user */}
