@@ -37,6 +37,11 @@ export default function Navbar() {
                     </NavLink>
                 )}
                 {isAuthenticated && (
+                    <NavLink to="/profile" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+                        Profile
+                    </NavLink>
+                )}
+                {isAuthenticated && (
                     <NavLink to="/quotes" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
                         💬 Quotes
                     </NavLink>

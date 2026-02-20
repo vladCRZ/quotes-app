@@ -11,6 +11,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import Unauthorized from './pages/Unauthorized'
 import Quotes from './pages/Quotes'
 import CommunityQuotes from './pages/CommunityQuotes'
+import Profile from './pages/Profile'
 
 export default function App() {
   return (
@@ -29,6 +30,11 @@ export default function App() {
           <Route path="/user" element={
             <PrivateRoute>
               <UserDashboard />
+            </PrivateRoute>
+          } />
+          <Route path="/profile" element={
+            <PrivateRoute>
+              <Profile />
             </PrivateRoute>
           } />
 
