@@ -1,7 +1,43 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import axios from 'axios'
+
+// ── Like button component ────────────────────────────────────────────────────
+function LikeButton({ quoteId, likeCount, likedByMe, isAuthenticated, onToggle }) {
+    const [loading, setLoading] = useState(false)
+
+    const handleClick = async () => {
+        if (!isAuthenticated || loading) return
+        setLoading(true)
+        try {
+            const res = await axios.post(`/api/quotes/${quoteId}/like`, {}, { withCredentials: true })
+            onToggle(res.data)
+        } catch { /* silently ignore */ }
+        finally { setLoading(false) }
+    }
+
+    return (
+        <button
+            onClick={handleClick}
+            disabled={loading}
+            title={isAuthenticated ? (likedByMe ? 'Unlike' : 'Like') : 'Sign in to like'}
+            style={{
+                display: 'inline-flex', alignItems: 'center', gap: '.35rem',
+                background: 'none', border: 'none', cursor: isAuthenticated ? 'pointer' : 'default',
+                color: likedByMe ? '#e45b5b' : 'var(--text-muted)',
+                fontSize: '.85rem', fontWeight: 600, padding: '0',
+                transition: 'color .2s, transform .15s',
+                opacity: loading ? 0.6 : 1,
+            }}
+            onMouseEnter={e => isAuthenticated && (e.currentTarget.style.transform = 'scale(1.15)')}
+            onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+        >
+            <span style={{ fontSize: '1.05rem' }}>{likedByMe ? '❤️' : '🤍'}</span>
+            {likeCount > 0 && <span>{likeCount}</span>}
+        </button>
+    )
+}
 
 export default function CommunityQuotes() {
     const { isAuthenticated } = useAuth()
@@ -11,12 +47,19 @@ export default function CommunityQuotes() {
     const [search, setSearch] = useState('')
     const [sortBy, setSortBy] = useState('newest')
 
-    useEffect(() => {
-        axios.get('/api/quotes')
+    const fetchQuotes = useCallback(() => {
+        setLoading(true)
+        axios.get('/api/quotes', { withCredentials: true })
             .then(res => setQuotes(res.data))
             .catch(() => setError('Failed to load quotes. Please try again later.'))
             .finally(() => setLoading(false))
     }, [])
+
+    useEffect(() => { fetchQuotes() }, [fetchQuotes])
+
+    const handleToggle = (updated) => {
+        setQuotes(prev => prev.map(q => q.id === updated.id ? updated : q))
+    }
 
     const filtered = useMemo(() => {
         let result = [...quotes]
@@ -31,6 +74,7 @@ export default function CommunityQuotes() {
         if (sortBy === 'newest') result.sort((a, b) => b.id - a.id)
         else if (sortBy === 'oldest') result.sort((a, b) => a.id - b.id)
         else if (sortBy === 'author') result.sort((a, b) => (a.author || '').localeCompare(b.author || ''))
+        else if (sortBy === 'liked') result.sort((a, b) => b.likeCount - a.likeCount)
         return result
     }, [quotes, search, sortBy])
 
@@ -67,7 +111,7 @@ export default function CommunityQuotes() {
                         borderRadius: 12, padding: '1rem 1.25rem',
                     }}>
                         <span style={{ color: 'var(--text-muted)', fontSize: '.9rem' }}>
-                            ✨ Want to add your own quotes?
+                            ✨ Want to add and like quotes?
                         </span>
                         <div style={{ display: 'flex', gap: '.5rem' }}>
                             <Link to="/register" className="btn btn-primary btn-sm">Join for free</Link>
@@ -122,6 +166,7 @@ export default function CommunityQuotes() {
                     <option value="newest">Newest first</option>
                     <option value="oldest">Oldest first</option>
                     <option value="author">By author</option>
+                    <option value="liked">Most liked</option>
                 </select>
             </div>
 
@@ -151,7 +196,7 @@ export default function CommunityQuotes() {
                     <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
                     {search
                         ? <>No quotes matching "<strong>{search}</strong>"</>
-                        : <>No quotes yet. <Link to="/register">Be the first!</Link></>}
+                        : <><Link to="/register">Be the first!</Link></>}
                 </div>
             )}
 
@@ -164,6 +209,15 @@ export default function CommunityQuotes() {
                             <div className="quote-meta">
                                 <span>— <strong>{q.author || 'Unknown'}</strong></span>
                                 <span style={{ fontSize: '.75rem' }}>by {q.createdBy}</span>
+                            </div>
+                            <div style={{ marginTop: '.75rem', paddingTop: '.75rem', borderTop: '1px solid var(--border)' }}>
+                                <LikeButton
+                                    quoteId={q.id}
+                                    likeCount={q.likeCount}
+                                    likedByMe={q.likedByMe}
+                                    isAuthenticated={isAuthenticated}
+                                    onToggle={handleToggle}
+                                />
                             </div>
                         </div>
                     ))}

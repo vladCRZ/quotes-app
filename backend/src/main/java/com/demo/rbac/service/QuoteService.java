@@ -3,6 +3,8 @@ package com.demo.rbac.service;
 import com.demo.rbac.dto.QuoteRequest;
 import com.demo.rbac.dto.QuoteResponse;
 import com.demo.rbac.model.Quote;
+import com.demo.rbac.model.QuoteLike;
+import com.demo.rbac.repository.QuoteLikeRepository;
 import com.demo.rbac.repository.QuoteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,38 +18,67 @@ import java.util.List;
 public class QuoteService {
 
     private final QuoteRepository quoteRepository;
+    private final QuoteLikeRepository quoteLikeRepository;
 
-    public List<QuoteResponse> findAll() {
+    // ─── Read ────────────────────────────────────────────────────────────────
+
+    public List<QuoteResponse> findAll(String username) {
         return quoteRepository.findAll().stream()
-                .map(QuoteResponse::from)
+                .map(q -> toResponse(q, username))
                 .toList();
     }
 
-    public QuoteResponse findById(Long id) {
-        return QuoteResponse.from(getOrThrow(id));
+    public QuoteResponse findById(Long id, String username) {
+        return toResponse(getOrThrow(id), username);
     }
+
+    // ─── Write ───────────────────────────────────────────────────────────────
 
     public QuoteResponse create(QuoteRequest req, String username) {
         Quote q = new Quote();
         q.setContent(req.getContent());
         q.setAuthor(req.getAuthor() != null ? req.getAuthor() : "Unknown");
         q.setCreatedBy(username);
-        return QuoteResponse.from(quoteRepository.save(q));
+        return toResponse(quoteRepository.save(q), username);
     }
 
-    public QuoteResponse update(Long id, QuoteRequest req) {
+    public QuoteResponse update(Long id, QuoteRequest req, String username) {
         Quote q = getOrThrow(id);
         q.setContent(req.getContent());
         if (req.getAuthor() != null)
             q.setAuthor(req.getAuthor());
-        return QuoteResponse.from(quoteRepository.save(q));
+        return toResponse(quoteRepository.save(q), username);
     }
 
     public void delete(Long id) {
-        if (!quoteRepository.existsById(id)) {
+        if (!quoteRepository.existsById(id))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Quote not found");
-        }
+        quoteLikeRepository.findAll().stream() // clean up orphaned likes
+                .filter(l -> l.getQuoteId().equals(id))
+                .map(QuoteLike::getId)
+                .forEach(quoteLikeRepository::deleteById);
         quoteRepository.deleteById(id);
+    }
+
+    // ─── Likes ───────────────────────────────────────────────────────────────
+
+    public QuoteResponse toggleLike(Long quoteId, String username) {
+        Quote q = getOrThrow(quoteId);
+        if (quoteLikeRepository.existsByQuoteIdAndUsername(quoteId, username)) {
+            quoteLikeRepository.deleteByQuoteIdAndUsername(quoteId, username);
+        } else {
+            quoteLikeRepository.save(new QuoteLike(quoteId, username));
+        }
+        return toResponse(q, username);
+    }
+
+    // ─── Helpers ─────────────────────────────────────────────────────────────
+
+    private QuoteResponse toResponse(Quote q, String username) {
+        long count = quoteLikeRepository.countByQuoteId(q.getId());
+        boolean liked = username != null &&
+                quoteLikeRepository.existsByQuoteIdAndUsername(q.getId(), username);
+        return QuoteResponse.from(q, count, liked);
     }
 
     private Quote getOrThrow(Long id) {

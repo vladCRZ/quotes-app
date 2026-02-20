@@ -20,16 +20,18 @@ public class QuoteController {
 
     private final QuoteService quoteService;
 
-    // ─── Read (GET /api/quotes is public; writes require auth) ──────────────
+    // ─── Read (public) ───────────────────────────────────────────────────────
 
     @GetMapping
-    public ResponseEntity<List<QuoteResponse>> getAll() {
-        return ResponseEntity.ok(quoteService.findAll());
+    public ResponseEntity<List<QuoteResponse>> getAll(Authentication auth) {
+        String username = auth != null ? auth.getName() : null;
+        return ResponseEntity.ok(quoteService.findAll(username));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<QuoteResponse> getOne(@PathVariable Long id) {
-        return ResponseEntity.ok(quoteService.findById(id));
+    public ResponseEntity<QuoteResponse> getOne(@PathVariable Long id, Authentication auth) {
+        String username = auth != null ? auth.getName() : null;
+        return ResponseEntity.ok(quoteService.findById(id, username));
     }
 
     // ─── Create ─────────────────────────────────────────────────────────────
@@ -49,8 +51,9 @@ public class QuoteController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<QuoteResponse> update(
             @PathVariable Long id,
-            @Valid @RequestBody QuoteRequest req) {
-        return ResponseEntity.ok(quoteService.update(id, req));
+            @Valid @RequestBody QuoteRequest req,
+            Authentication auth) {
+        return ResponseEntity.ok(quoteService.update(id, req, auth.getName()));
     }
 
     // ─── Delete ─────────────────────────────────────────────────────────────
@@ -60,5 +63,15 @@ public class QuoteController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         quoteService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ─── Like / Unlike ───────────────────────────────────────────────────────
+
+    @PostMapping("/{id}/like")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<QuoteResponse> toggleLike(
+            @PathVariable Long id,
+            Authentication auth) {
+        return ResponseEntity.ok(quoteService.toggleLike(id, auth.getName()));
     }
 }

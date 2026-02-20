@@ -1,6 +1,42 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { getQuotes, createQuote, updateQuote, deleteQuote } from '../quotesApi'
+import axios from 'axios'
+
+function LikeButton({ quoteId, likeCount, likedByMe, isAuthenticated, onToggle }) {
+    const [loading, setLoading] = useState(false)
+
+    const handleClick = async () => {
+        if (!isAuthenticated || loading) return
+        setLoading(true)
+        try {
+            const res = await axios.post(`/api/quotes/${quoteId}/like`, {}, { withCredentials: true })
+            onToggle(res.data)
+        } catch { /* ignore */ }
+        finally { setLoading(false) }
+    }
+
+    return (
+        <button
+            onClick={handleClick}
+            disabled={loading}
+            title={likedByMe ? 'Unlike' : 'Like'}
+            style={{
+                display: 'inline-flex', alignItems: 'center', gap: '.35rem',
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: likedByMe ? '#e45b5b' : 'var(--text-muted)',
+                fontSize: '.85rem', fontWeight: 600, padding: '0',
+                transition: 'color .2s, transform .15s',
+                opacity: loading ? 0.6 : 1,
+            }}
+            onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.15)')}
+            onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+        >
+            <span style={{ fontSize: '1.05rem' }}>{likedByMe ? '❤️' : '🤍'}</span>
+            {likeCount > 0 && <span>{likeCount}</span>}
+        </button>
+    )
+}
 
 export default function Quotes() {
     const { user } = useAuth()
@@ -43,6 +79,10 @@ export default function Quotes() {
     }, [])
 
     useEffect(() => { fetchQuotes() }, [fetchQuotes])
+
+    const handleToggle = (updated) => {
+        setQuotes(prev => prev.map(q => q.id === updated.id ? updated : q))
+    }
 
     // ── Add ────────────────────────────────────────────────────────────────────
 
@@ -234,37 +274,46 @@ export default function Quotes() {
                                         Added by {q.createdBy} · {formatDate(q.createdAt)}
                                     </span>
                                 </div>
-                                <div className="quote-actions">
-                                    <button
-                                        className="btn btn-outline btn-sm"
-                                        onClick={() => startEdit(q)}
-                                    >
-                                        ✏ Edit
-                                    </button>
-                                    {confirmDeleteId === q.id ? (
-                                        <>
-                                            <span style={{ fontSize: '.8rem', color: 'var(--text-muted)', alignSelf: 'center' }}>Sure?</span>
+                                <div className="quote-actions" style={{ justifyContent: 'space-between' }}>
+                                    <div style={{ display: 'flex', gap: '.5rem' }}>
+                                        <button
+                                            className="btn btn-outline btn-sm"
+                                            onClick={() => startEdit(q)}
+                                        >
+                                            ✏ Edit
+                                        </button>
+                                        {confirmDeleteId === q.id ? (
+                                            <>
+                                                <span style={{ fontSize: '.8rem', color: 'var(--text-muted)', alignSelf: 'center' }}>Sure?</span>
+                                                <button
+                                                    className="btn btn-danger btn-sm"
+                                                    onClick={() => handleDelete(q.id)}
+                                                >
+                                                    Yes, Delete
+                                                </button>
+                                                <button
+                                                    className="btn btn-outline btn-sm"
+                                                    onClick={() => setConfirmDeleteId(null)}
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </>
+                                        ) : (
                                             <button
                                                 className="btn btn-danger btn-sm"
-                                                onClick={() => handleDelete(q.id)}
+                                                onClick={() => setConfirmDeleteId(q.id)}
                                             >
-                                                Yes, Delete
+                                                🗑 Delete
                                             </button>
-                                            <button
-                                                className="btn btn-outline btn-sm"
-                                                onClick={() => setConfirmDeleteId(null)}
-                                            >
-                                                Cancel
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <button
-                                            className="btn btn-danger btn-sm"
-                                            onClick={() => setConfirmDeleteId(q.id)}
-                                        >
-                                            🗑 Delete
-                                        </button>
-                                    )}
+                                        )}
+                                    </div>
+                                    <LikeButton
+                                        quoteId={q.id}
+                                        likeCount={q.likeCount}
+                                        likedByMe={q.likedByMe}
+                                        isAuthenticated={true}
+                                        onToggle={handleToggle}
+                                    />
                                 </div>
                             </>
                         )}
